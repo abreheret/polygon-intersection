@@ -35,12 +35,13 @@ class UIPolyIntersection {
 public:
 
 	UIPolyIntersection(int width) { 
+		_nb_grid = 50;
 		_width = width;
 		_height = _width*9/16;
 		hover_point = selected_point = -1;
 		curr_rgb = cvCreateImage(cvSize(_width,_height),8,3);
 		pCurr = cvPoint(0,0);
-		
+		_resolution = _width /(float)_nb_grid;
 		initRandom();
 		cvZero(curr_rgb);
 		cvNamedWindow(title, CV_WINDOW_AUTOSIZE);
@@ -62,8 +63,6 @@ public:
 				_all.push_back(&_poly[j][i]);
 			}
 		}
-		_nb_grid = 50;
-		_resolution = _width /(float)_nb_grid;
 		updateIntersection();
 	}
 
