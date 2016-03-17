@@ -43,17 +43,17 @@ public:
 
 	void init() {
 		_poly[0].clear();
-		_poly[0].add(cvPoint(2* 3*_resolution,2*3*_resolution));
-		_poly[0].add(cvPoint(2*11*_resolution,2*3*_resolution));
-		_poly[0].add(cvPoint(2*11*_resolution,2*6*_resolution));
-		_poly[0].add(cvPoint(2* 1*_resolution,2*6*_resolution));
-		_poly[0].add(cvPoint(2* 1*_resolution,2*4*_resolution));
-			
-		_poly[1].clear();
-		_poly[1].add(cvPoint(2*2*_resolution,2*1*_resolution));
-		_poly[1].add(cvPoint(2*4*_resolution,2*1*_resolution));
-		_poly[1].add(cvPoint(2*4*_resolution,2*5*_resolution));
-		_poly[1].add(cvPoint(2*2*_resolution,2*5*_resolution));
+		_poly[0].add(cvPoint(int(2* 3*_resolution),int(2*3*_resolution)));
+		_poly[0].add(cvPoint(int(2*11*_resolution),int(2*3*_resolution)));
+		_poly[0].add(cvPoint(int(2*11*_resolution),int(2*6*_resolution)));
+		_poly[0].add(cvPoint(int(2* 1*_resolution),int(2*6*_resolution)));
+		_poly[0].add(cvPoint(int(2* 1*_resolution),int(2*4*_resolution)));
+							 
+		_poly[1].clear();	 
+		_poly[1].add(cvPoint(int(2*2*_resolution),int(2*1*_resolution)));
+		_poly[1].add(cvPoint(int(2*4*_resolution),int(2*1*_resolution)));
+		_poly[1].add(cvPoint(int(2*4*_resolution),int(2*5*_resolution)));
+		_poly[1].add(cvPoint(int(2*2*_resolution),int(2*5*_resolution)));
 
 		for (int j = 0 ; j < 2 ; j++ ) {
 			for (int i = 0 ; i < _poly[j].size() ; i++ ) {
@@ -78,7 +78,8 @@ public:
 	}
 
 	void updateIntersection() {
-		intersectPolygon(_poly[0],_poly[1],_inter);
+		//intersectPolygon(_poly[0],_poly[1],_inter);
+		intersectPolygonSHPC(_poly[0],_poly[1],_inter);
 	}
 
 	void mouseEvent( int event, int x, int y, int flags, void* ) {

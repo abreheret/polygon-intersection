@@ -35,5 +35,7 @@ struct Polygon {
 
 void intersectPolygon( const CvPoint * poly0, int n0,const CvPoint * poly1,int n1, Polygon & inter ) ;
 void intersectPolygon( const Polygon & poly0, const Polygon & poly1, Polygon & inter ) ;
+void intersectPolygonSHPC(const Polygon * sub,const Polygon* clip,Polygon* res) ;
+void intersectPolygonSHPC(const Polygon & sub,const Polygon& clip,Polygon& res) ;
 
 #endif //

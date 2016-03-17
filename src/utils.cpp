@@ -180,7 +180,96 @@ void intersectPolygon( const CvPoint * poly0, int n0,const CvPoint * poly1,int n
 	inter.pointsOrdered();
 }
 
-
 void intersectPolygon( const Polygon & poly0, const Polygon & poly1, Polygon & inter ) {
 	intersectPolygon(&poly0[0],poly0.size(),&poly1[0],poly1.size(),inter);
+}
+
+
+//------------------------------------------------------------------------------------------------------------
+//             SHPC :  Sutherland-Hodgeman-Polygon-Clipping Algorihtm
+//------------------------------------------------------------------------------------------------------------
+static inline int cross(const CvPoint* a,const CvPoint* b) {
+	return a->x * b->y - a->y * b->x;
+}
+
+static inline CvPoint* vsub(const CvPoint* a,const CvPoint* b, CvPoint* res) {
+	res->x = a->x - b->x;
+	res->y = a->y - b->y;
+	return res;
+}
+
+static int line_sect(const CvPoint* x0,const CvPoint* x1,const CvPoint* y0,const CvPoint* y1, CvPoint* res) {
+	CvPoint dx, dy, d;
+	vsub(x1, x0, &dx);
+	vsub(y1, y0, &dy);
+	vsub(x0, y0, &d);
+	float dyx = (float)cross(&dy, &dx);
+	if (!dyx) return 0;
+	dyx = cross(&d, &dx) / dyx;
+	if (dyx <= 0 || dyx >= 1) return 0;
+	res->x = int(y0->x + dyx * dy.x);
+	res->y = int(y0->y + dyx * dy.y);
+	return 1;
+}
+
+static int left_of(const CvPoint* a,const CvPoint* b,const CvPoint* c) {
+	CvPoint tmp1, tmp2;
+	int x;
+	vsub(b, a, &tmp1);
+	vsub(c, b, &tmp2);
+	x = cross(&tmp1, &tmp2);
+	return x < 0 ? -1 : x > 0;
+}
+
+static void poly_edge_clip(const Polygon* sub,const  CvPoint* x0,const  CvPoint* x1, int left, Polygon* res) {
+	int i, side0, side1;
+	CvPoint tmp;
+	const CvPoint* v0 = sub->pt+ sub->n - 1;
+	const CvPoint* v1;
+	res->clear();
+
+	side0 = left_of(x0, x1, v0);
+	if (side0 != -left) res->add(*v0);
+
+	for (i = 0; i < sub->n; i++) {
+		v1 = sub->pt + i;
+		side1 = left_of(x0, x1, v1);
+		if (side0 + side1 == 0 && side0)
+			/* last point and current straddle the edge */
+			if (line_sect(x0, x1, v0, v1, &tmp))
+				res->add(tmp);
+		if (i == sub->n - 1) break;
+		if (side1 != -left) res->add(*v1);
+		v0 = v1;
+		side0 = side1;
+	}
+}
+
+static int poly_winding(const Polygon* p) {
+	return left_of(p->pt, p->pt + 1, p->pt + 2);
+}
+
+void intersectPolygonSHPC(const Polygon * sub,const Polygon* clip,Polygon* res) {
+	int i;
+	Polygon P1,P2;
+	Polygon * p1 = &P1;
+	Polygon * p2 = &P2;
+	Polygon * tmp ;
+
+	int dir = poly_winding(clip);
+	poly_edge_clip(sub, clip->pt + clip->n - 1, clip->pt, dir, p2);
+	for (i = 0; i < clip->n - 1; i++) {
+		tmp = p2; p2 = p1; p1 = tmp;
+		if(p1->n == 0) {
+			p2->n = 0;
+			break;
+		}
+		poly_edge_clip(p1, clip->pt + i, clip->pt + i + 1, dir, p2);
+	}
+	res->clear();
+	for (i = 0 ; i < p2->n ; i++) res->add(p2->pt[i]);
+}
+
+void intersectPolygonSHPC(const Polygon & sub,const Polygon& clip,Polygon& res) {
+	intersectPolygonSHPC(&sub,&clip,&res);
 }
